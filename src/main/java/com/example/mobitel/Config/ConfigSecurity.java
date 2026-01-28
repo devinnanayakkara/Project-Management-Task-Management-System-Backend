@@ -84,7 +84,8 @@ public class ConfigSecurity {
                         ).hasRole("Intern")
 
                         .requestMatchers(
-                                "/project-management-system/task/completed-projects"
+                                "/project-management-system/task/completed-projects",
+                                "/project-management-system/dashboard/counts"
                         ).hasAnyRole("Manager","Employee","Intern")
 
                         .anyRequest().authenticated()

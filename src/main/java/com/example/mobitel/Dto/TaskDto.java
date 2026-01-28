@@ -52,4 +52,11 @@ public class TaskDto {
     private String status_id;
     private String status_name;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate project_start_date;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate project_expected_end_date;
+
+
 }

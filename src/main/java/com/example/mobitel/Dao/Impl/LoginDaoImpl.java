@@ -288,5 +288,16 @@ public class LoginDaoImpl implements LoginDao {
         return 0; // fallback if query fails
     }
 
+    @Override
+    public String getUserTypeByUsername(String username) {
+        return jdbcTemplate.queryForObject(
+                "SELECT userType FROM pmatm WHERE username = ?",
+                String.class,
+                username
+        );
+    }
+
+
+
 
 }

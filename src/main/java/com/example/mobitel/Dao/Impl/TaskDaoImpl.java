@@ -323,68 +323,6 @@ public class TaskDaoImpl implements TaskDao {
         }
     }
 
-
-
-
-
-
-//    @Override
-//    public TaskDto findAssignTask(String task_id, String assign_to) {
-//        String sql = "SELECT * FROM assign_tasks WHERE task_id = ? AND assign_to = ? " +
-//                "AND (terminated_by IS NULL OR terminated_on IS NULL)";
-//
-//        try {
-//            SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, task_id, assign_to);
-//            if (rs.next()) {
-//                TaskDto dto = new TaskDto();
-//                dto.setTask_id(rs.getString("task_id"));
-//                dto.setProject_id(rs.getInt("project_id"));
-//                dto.setAssign_to(rs.getString("assign_to"));
-//                dto.setAdded_by(rs.getString("added_by"));
-//                dto.setAdded_on(rs.getDate("added_on").toLocalDate());
-//                dto.setStatus(rs.getString("status"));
-//                dto.setStart_date(rs.getDate("start_date").toLocalDate());
-//                dto.setExpected_end_date(rs.getDate("expected_end_date").toLocalDate());
-//                if (rs.getDate("actual_end_date") != null)
-//                    dto.setActual_end_date(rs.getDate("actual_end_date").toLocalDate());
-//                return dto;
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException("Error finding assigned task: " + e.getMessage(), e);
-//        }
-//        return null;
-//    }
-
-
-//    @Transactional
-//    @Override
-//    public int assignTask(TaskDto request) {
-//        try {
-//            String insertSql = "INSERT INTO assign_tasks " +
-//                    "(task_id, project_id, assign_to, added_by, added_on, status, start_date, expected_end_date, actual_end_date) " +
-//                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-//
-//            int rows = jdbcTemplate.update(insertSql,
-//                    request.getTask_id(),
-//                    request.getProject_id(),
-//                    request.getAssign_to(),
-//                    request.getAdded_by(),
-//                    request.getAdded_on(),
-//                    request.getStatus(),
-//                    request.getStart_date(),
-//                    request.getExpected_end_date(),
-//                    request.getActual_end_date());
-//
-//            // update tasks table
-//            jdbcTemplate.update("UPDATE tasks SET assign_to = ? ,status='A' WHERE task_id = ?",
-//                    request.getAssign_to(), request.getTask_id());
-//
-//            return rows;
-//        } catch (Exception e) {
-//            throw new RuntimeException("Error while assigning task: " + e.getMessage(), e);
-//        }
-//    }
-
     @Override
     public int assignTask(TaskDto request) {
         // Terminate previous active task
@@ -440,12 +378,6 @@ public class TaskDaoImpl implements TaskDao {
 
         return rows;
     }
-
-
-
-
-
-
 
     @Override
     public List<TaskDto> getUnassignedTasksByProject(Integer project_id) {
@@ -506,63 +438,6 @@ public class TaskDaoImpl implements TaskDao {
         }
     }
 
-//    @Override
-//    public Map<String, List<TaskDto>> getTasksOverviewForUser(String username) {
-//        Map<String, List<TaskDto>> result = new HashMap<>();
-//
-//        try {
-//            // 1. Tasks assigned to logged-in user
-//            String sqlUserTasks = """
-//            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-//                   t.expected_end_date, t.actual_end_date, t.project_id,
-//                   t.assign_to, u.username AS assign_to_username, t.status
-//            FROM tasks t
-//            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-//            WHERE u.username = ?
-//              AND t.status = 'A'
-//              AND t.terminated_by IS NULL
-//              AND t.terminated_on IS NULL
-//        """;
-//            List<TaskDto> userTasks = jdbcTemplate.query(sqlUserTasks, new Object[]{username}, new BeanPropertyRowMapper<>(TaskDto.class));
-//            result.put("userTasks", userTasks);
-//
-//
-//            String sqlUnassignedTasks = """
-//            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-//                   t.expected_end_date, t.actual_end_date, t.project_id,
-//                   t.assign_to, u.username AS assign_to_username, t.status
-//            FROM tasks t
-//            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-//            WHERE t.assign_to IS NULL
-//              AND t.status = 'P'
-//              AND t.terminated_by IS NULL
-//              AND t.terminated_on IS NULL
-//        """;
-//            List<TaskDto> unassignedTasks = jdbcTemplate.query(sqlUnassignedTasks, new BeanPropertyRowMapper<>(TaskDto.class));
-//            result.put("unassignedTasks", unassignedTasks);
-//
-//            // 3. Tasks assigned to interns
-//            String sqlInternTasks = """
-//            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-//                   t.expected_end_date, t.actual_end_date, t.project_id,
-//                   t.assign_to, u.username AS assign_to_username, t.status
-//            FROM tasks t
-//            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-//            WHERE u.userType = 'Intern'
-//              AND t.status = 'A'
-//              AND t.terminated_by IS NULL
-//              AND t.terminated_on IS NULL
-//        """;
-//            List<TaskDto> internTasks = jdbcTemplate.query(sqlInternTasks, new BeanPropertyRowMapper<>(TaskDto.class));
-//            result.put("internTasks", internTasks);
-//
-//        } catch (Exception e) {
-//            logger.error("Error fetching tasks overview: {}", e.getMessage(), e);
-//        }
-//
-//        return result;
-//    }
-
     @Override
     public Map<String, List<TaskDto>> getTasksOverviewForUser(String username) {
         Map<String, List<TaskDto>> result = new HashMap<>();
@@ -571,18 +446,24 @@ public class TaskDaoImpl implements TaskDao {
 
             //  Tasks assigned to logged-in user
             String sqlUserTasks = """
-            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-                   t.expected_end_date, t.actual_end_date, t.project_id,
-                   t.assign_to, u.username AS assign_to_username,
-                   t.status AS status_id, s.status_name
-            FROM tasks t
-            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-            LEFT JOIN status s ON t.status = s.status_id
-            WHERE u.username = ?
-              AND t.status = 'A'
-              AND t.terminated_by IS NULL
-              AND t.terminated_on IS NULL
-        """;
+                SELECT t.task_id, t.task_name, t.task_description, t.start_date,
+                       t.expected_end_date, t.actual_end_date,
+                       t.project_id,
+                       p.project_name, 
+                       p.start_date          AS project_start_date,          
+                       p.expected_end_date   AS project_expected_end_date,
+                       t.assign_to, u.username AS assign_to_username,
+                       t.status AS status_id, s.status_name
+                       FROM tasks t
+                       LEFT JOIN pmatm u ON t.assign_to = u.user_id
+                       LEFT JOIN status s ON t.status = s.status_id
+                       LEFT JOIN projects p ON p.project_id = t.project_id   
+                       WHERE u.username = ?
+                       AND t.status = 'A'
+                       AND t.terminated_by IS NULL
+                       AND t.terminated_on IS NULL
+            """;
+
 
             List<TaskDto> userTasks = jdbcTemplate.query(
                     sqlUserTasks,
@@ -594,18 +475,24 @@ public class TaskDaoImpl implements TaskDao {
 
             //  Unassigned Tasks
             String sqlUnassignedTasks = """
-            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-                   t.expected_end_date, t.actual_end_date, t.project_id,
-                   t.assign_to, u.username AS assign_to_username,
-                   t.status AS status_id, s.status_name
-            FROM tasks t
-            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-            LEFT JOIN status s ON t.status = s.status_id
-            WHERE t.assign_to IS NULL
-              AND t.status = 'P'
-              AND t.terminated_by IS NULL
-              AND t.terminated_on IS NULL
-        """;
+               SELECT t.task_id, t.task_name, t.task_description, t.start_date,
+               t.expected_end_date, t.actual_end_date,
+               t.project_id,
+               p.project_name,  
+               p.start_date          AS project_start_date,          
+               p.expected_end_date   AS project_expected_end_date,
+               t.assign_to, u.username AS assign_to_username,
+               t.status AS status_id, s.status_name
+               FROM tasks t
+               LEFT JOIN pmatm u ON t.assign_to = u.user_id
+               LEFT JOIN status s ON t.status = s.status_id
+               LEFT JOIN projects p ON p.project_id = t.project_id   
+               WHERE t.assign_to IS NULL
+               AND t.status = 'P'
+               AND t.terminated_by IS NULL
+               AND t.terminated_on IS NULL
+               """;
+
 
             List<TaskDto> unassignedTasks = jdbcTemplate.query(
                     sqlUnassignedTasks,
@@ -616,18 +503,24 @@ public class TaskDaoImpl implements TaskDao {
 
             // Tasks assigned to interns
             String sqlInternTasks = """
-            SELECT t.task_id, t.task_name, t.task_description, t.start_date,
-                   t.expected_end_date, t.actual_end_date, t.project_id,
-                   t.assign_to, u.username AS assign_to_username,
-                   t.status AS status_id, s.status_name
-            FROM tasks t
-            LEFT JOIN pmatm u ON t.assign_to = u.user_id
-            LEFT JOIN status s ON t.status = s.status_id
-            WHERE u.userType = 'Intern'
-              AND t.status = 'A'
-              AND t.terminated_by IS NULL
-              AND t.terminated_on IS NULL
-        """;
+               SELECT t.task_id, t.task_name, t.task_description, t.start_date,
+               t.expected_end_date, t.actual_end_date,
+               t.project_id,
+               p.project_name, 
+               p.start_date          AS project_start_date,          
+               p.expected_end_date   AS project_expected_end_date,
+               t.assign_to, u.username AS assign_to_username,
+               t.status AS status_id, s.status_name
+               FROM tasks t
+               LEFT JOIN pmatm u ON t.assign_to = u.user_id
+               LEFT JOIN status s ON t.status = s.status_id
+               LEFT JOIN projects p ON p.project_id = t.project_id   
+               WHERE u.userType = 'Intern'
+               AND t.status = 'A'
+               AND t.terminated_by IS NULL
+               AND t.terminated_on IS NULL
+               """;
+
 
             List<TaskDto> internTasks = jdbcTemplate.query(
                     sqlInternTasks,

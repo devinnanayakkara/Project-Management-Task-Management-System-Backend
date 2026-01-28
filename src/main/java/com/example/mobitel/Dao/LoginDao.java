@@ -32,4 +32,6 @@ public interface LoginDao {
 
    int countActiveUsers();
 
+   String getUserTypeByUsername(String username);
+
 }
